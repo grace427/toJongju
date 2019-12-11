@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -47,54 +46,68 @@ public class FiveFragment extends Fragment {
     // 메인 화면 출력용
     ArrayList<Data> list = new ArrayList<>();
     // 상세 다이얼로그 출력용
-    Data detailData = new Data();
-    TextView txt_Detail_Info ;
-    ImageView img_Detail_Info ;
+    Data detailData2 = new Data();
+    TextView txt_Detail_Info;
+    ImageView img_Detail_Info;
+
 
     final static String TAG = "MainActivity";
     static final String KEY = "GN2mE8m8pbEpOyKZDhiRdDOZjg%2FR%2FUEIgo7z26k3HEefz8M0DvSZZwn0ekpLJmg%2F42jihzBbKf57CP79m12CrA%3D%3D";
     static final String appName = "Zella";
 
-    ArrayList<Integer> contentIdList = new ArrayList<>();
+    ArrayList<Integer> contentIdList2 = new ArrayList<>();
 
     public FiveFragment() {
         // Required empty public constructor
     }
 
     //뷰페이저로 프레그먼트가 변화되는 상태를 저장하는 변수가 필요하다.
-    public static FiveFragment newInstance(){
+    public static FiveFragment newInstance() {
         FiveFragment fragmentFive = new FiveFragment();
         return fragmentFive;
     }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        view=inflater.inflate(R.layout.fragment_five,container,false);
-        ((MainActivity)getActivity()).refresh();
+        view = inflater.inflate(R.layout.fragment_five, container, false);
 
         recyclerView = view.findViewById(R.id.grid_recyclerview);
-        adapter = new MyAdapter(getActivity(), list, new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                if (v.getTag() != null) {
-                    int position = (int) v.getTag();
-
-                    FiveFragment.AsyncTaskClassSub asyncSub = new FiveFragment.AsyncTaskClassSub();
-                    asyncSub.execute(position);
-                }
-            }
-        });
 
         layoutManager = new LinearLayoutManager(getActivity());
 
         recyclerView.setLayoutManager(layoutManager);
 
-        FiveFragment.AsyncTaskClassMain async = new FiveFragment.AsyncTaskClassMain();
-        async.execute();
-
         return view;
+
+    } // onCreateView
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            FiveFragment.AsyncTaskClassMain async = new FiveFragment.AsyncTaskClassMain();
+            async.execute();
+
+            adapter = new MyAdapter(getActivity(), list, new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    if (v.getTag() != null) {
+                        int position = (int) v.getTag();
+
+                        Log.d(TAG, " frg의 아이템 클릭 List : " + list);
+                        FiveFragment.AsyncTaskClassSub asyncSub = new FiveFragment.AsyncTaskClassSub();
+                        asyncSub.execute(position);
+                    }
+                }
+            });
+
+        } else {
+
+        }
     }
+
 
     class AsyncTaskClassMain extends android.os.AsyncTask<Integer, Long, String> {
 
@@ -110,7 +123,7 @@ public class FiveFragment extends Fragment {
         protected String doInBackground(Integer... integers) {
             getAreaBasedList();
             // publishProgress()를 호출하면 onProgressUpdate가 실행되고 메인쓰레드에서 UI 처리를 한다
-            // publishProgress();
+            //publishProgress();
             return "작업 종료";
         }
 
@@ -123,35 +136,41 @@ public class FiveFragment extends Fragment {
         // doInBackground 메서드가 완료되면 메인 쓰레드가 얘를 호출한다(doInBackground가 반환한 값을 매개변수로 받음)
         @Override
         protected void onPostExecute(String s) {
-            // Toast.makeText(getApplicationContext(), s, Toast.LENGTH_LONG).show();
             super.onPostExecute(s);
         }
     } // end of AsyncTaskClassMain
 
-    class AsyncTaskClassSub extends android.os.AsyncTask<Integer, Data, String> {
+    class AsyncTaskClassSub extends android.os.AsyncTask<Integer, Data, Data> {
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
         }
 
+        // 일반 쓰레드에서 실행
         @Override
-        protected String doInBackground(Integer... integers) {
+        protected Data doInBackground(Integer... integers) {
             int position = integers[0];
-            adapter.TourData(position);
-            Log.d(TAG, "포지션 값 : " + position);
 
-            Data data = getData(contentIdList.get(position));
+            Data data2 = getData(contentIdList2.get(position));
 
-            publishProgress(data);
-            return "작업 종료";
+
+            Log.d(TAG, " AsyncTaskSub doInBackground의 contentIDList :  " + contentIdList2);
+            Log.d(TAG, "2 AsyncTaskSub doInBackground의 data2 :  " + data2);
+
+           // publishProgress(data2);
+            return data2;
+        }
+
+        // 메인 스레드에서 실행
+        @Override
+        protected void onProgressUpdate(Data... values) {
+            super.onProgressUpdate(values);
         }
 
         @Override
-        protected void onProgressUpdate(Data... values) {
-            Data data = values[0];
-            // Log.d(TAG, "asyncTask에서 : "+detailData);
-            Log.d(TAG, "asyncTask에서 : "+data.toString());
+        protected void onPostExecute(Data data2) {
+            super.onPostExecute(data2);
             dialogView = View.inflate(getActivity(), R.layout.detail_info, null);
             dialog = new AlertDialog.Builder(getActivity());
             dialog.setTitle("  -- 상세 정보 --");
@@ -159,9 +178,11 @@ public class FiveFragment extends Fragment {
             txt_Detail_Info = dialogView.findViewById(R.id.txt_Detail_Info);
             img_Detail_Info = dialogView.findViewById(R.id.img_Detail_Info);
 
-            txt_Detail_Info.setText(data.getTitle()+"\n\n");
-            txt_Detail_Info.append(data.getAddr()+"\n\n");
-            txt_Detail_Info.append(data.getOverView()+"\n\n");
+            Log.d(TAG, " 3 onProgressUpdate 데이터 받아와서 다이얼로그에 장착 : "+data2);
+            txt_Detail_Info.setText(data2.getTitle() + "\n\n");
+            txt_Detail_Info.append(data2.getAddr() + "\n\n");
+            txt_Detail_Info.append(data2.getOverView() + "\n\n");
+
             // img_Detail_Info.setImageURI(Uri.parse(data.getFirstImage()));
 
             dialog.setView(dialogView);
@@ -174,24 +195,18 @@ public class FiveFragment extends Fragment {
 
             dialog.show();
 
-            super.onProgressUpdate(values);
         }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-        }
-    } // end of AsyncTaskClass
+    } // end of AsyncTaskClassSub
 
 
     // contentid를 위한 함수(contentId는 detailCommon에서 쓰기 위해 구한다)
     private void getAreaBasedList() {
         queue = Volley.newRequestQueue(getActivity());
-        // 액티비티 28
+        // 쇼핑 38
         String url = "http://api.visitkorea.or.kr/openapi/service/"
                 + "rest/KorService/areaBasedList?ServiceKey=" + KEY
-                + "&areaCode=1&contentTypeId=28&listYN=Y&arrange=P"
-                + "&numOfRows=14&pageNo=1&MobileOS=AND&MobileApp="
+                + "&areaCode=1&contentTypeId=38&listYN=Y&arrange=P"
+                + "&numOfRows=8&pageNo=1&MobileOS=AND&MobileApp="
                 + appName + "&_type=json";
 
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
@@ -205,20 +220,22 @@ public class FiveFragment extends Fragment {
                             JSONObject parse_items = (JSONObject) parse_body.get("items");
                             JSONArray parse_itemlist = (JSONArray) parse_items.get("item");
 
+                            list.removeAll(list);
+                            contentIdList2.removeAll(contentIdList2);
                             for (int i = 0; i < parse_itemlist.length(); i++) {
                                 JSONObject imsi = (JSONObject) parse_itemlist.get(i);
 
-                                Data data = new Data();
-                                data.setFirstImage(imsi.getString("firstimage"));
-                                data.setTitle(imsi.getString("title"));
+                                Data data2 = new Data();
+                                data2.setFirstImage(imsi.getString("firstimage"));
+                                data2.setTitle(imsi.getString("title"));
 
-                                list.add(data);
+                                list.add(data2);
 
-                                contentIdList.add(Integer.valueOf(imsi.getString("contentid")));
+                                contentIdList2.add(Integer.valueOf(imsi.getString("contentid")));
                             }
 
+                            Log.d(TAG, " frg의 getAreabased List : " + list);
                             recyclerView.setAdapter(adapter);
-                            adapter.notifyDataSetChanged();
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -256,6 +273,7 @@ public class FiveFragment extends Fragment {
 
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
@@ -264,15 +282,12 @@ public class FiveFragment extends Fragment {
                             JSONObject parse_items = (JSONObject) parse_body.get("items");
                             JSONObject parse_itemlist = (JSONObject) parse_items.get("item");
 
-                            // detailData = null;
-                            detailData.setFirstImage(parse_itemlist.getString("firstimage"));
-                            detailData.setTitle(parse_itemlist.getString("title"));
-                            detailData.setAddr(parse_itemlist.getString("addr1"));
-                            detailData.setOverView(parse_itemlist.getString("overview"));
+                            detailData2.setFirstImage(parse_itemlist.getString("firstimage"));
+                            detailData2.setTitle(parse_itemlist.getString("title"));
+                            detailData2.setAddr(parse_itemlist.getString("addr1"));
+                            detailData2.setOverView(parse_itemlist.getString("overview"));
 
-                            Log.d(TAG, detailData.getTitle());
-
-
+                            Log.d(TAG, "1. getData에서 갓 생성한 데이터  :  "+detailData2);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -287,9 +302,12 @@ public class FiveFragment extends Fragment {
                     }
                 });
         queue.add(jsObjRequest);
-        Log.d(TAG, "getDATA에서 : "+detailData);
-        return detailData;
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return detailData2;
     }
-
 
 }

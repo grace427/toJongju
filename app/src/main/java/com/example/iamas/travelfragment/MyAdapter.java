@@ -25,14 +25,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     private static View.OnClickListener onClickListener;
     Context context;
     ArrayList<Data> list;
-   // Hashtable<Integer, Data> item;
 
     public MyAdapter(Context context, ArrayList<Data> list, View.OnClickListener onClick) {
         super();
         this.context = context;
         this.list = list;
         onClickListener = onClick;
-
     }
 
     @Override
@@ -43,11 +41,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
        // Log.d(TAG, list.get(position).getTitle()+"   "+list.get(position).getFirstImage()+"   "+(i++));
         holder.rootView.setTag(position);
 
-
 //        Uri uri = Uri.parse(item.get(position).getFirstImage());
 //        holder.imgView.setImageURI(uri);
 //        holder.txtView.setText(item.get(position).getTitle());
-
     }
 
     @Override
@@ -80,20 +76,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         }
     }
 
-    public Data TourData(int position){
-
-        return list != null ? list.get(position) : null;
-    }
 
     public void loadImageInBackground(String str, Context context) {
-
 
         Target target = new Target() {
 
             @Override
             public void onPrepareLoad(Drawable arg0) {
-
-
         }
 
             @Override

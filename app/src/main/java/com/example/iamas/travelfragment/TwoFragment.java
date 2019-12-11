@@ -3,15 +3,11 @@ package com.example.iamas.travelfragment;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -35,7 +31,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-// 쇼핑 테마
+// 맛집 코드 : 39
 public class TwoFragment extends Fragment {
     private View view;
     ProgressDialog pDialog;
@@ -50,7 +46,7 @@ public class TwoFragment extends Fragment {
     // 메인 화면 출력용
     ArrayList<Data> list = new ArrayList<>();
     // 상세 다이얼로그 출력용
-    Data detailData = new Data();
+    Data detailData4 = new Data();
     TextView txt_Detail_Info ;
     ImageView img_Detail_Info ;
 
@@ -58,7 +54,7 @@ public class TwoFragment extends Fragment {
     static final String KEY = "GN2mE8m8pbEpOyKZDhiRdDOZjg%2FR%2FUEIgo7z26k3HEefz8M0DvSZZwn0ekpLJmg%2F42jihzBbKf57CP79m12CrA%3D%3D";
     static final String appName = "Zella";
 
-    ArrayList<Integer> contentIdList = new ArrayList<>();
+    ArrayList<Integer> contentIdList4 = new ArrayList<>();
 
     public TwoFragment() {
         // Required empty public constructor
@@ -73,31 +69,39 @@ public class TwoFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view=inflater.inflate(R.layout.fragment_two,container,false);
-        ((MainActivity)getActivity()).refresh();
 
         recyclerView = view.findViewById(R.id.grid_recyclerview);
-        adapter = new MyAdapter(getActivity(), list, new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                if (v.getTag() != null) {
-                    int position = (int) v.getTag();
-
-                    Log.d(TAG, "TwoFrag아이템 클릭시 onClick에서 받는 포지션 : "+position);
-                    TwoFragment.AsyncTaskClassSub asyncSub = new TwoFragment.AsyncTaskClassSub();
-                    asyncSub.execute(position);
-                }
-            }
-        });
 
         layoutManager = new LinearLayoutManager(getActivity());
 
         recyclerView.setLayoutManager(layoutManager);
 
-        TwoFragment.AsyncTaskClassMain async = new TwoFragment.AsyncTaskClassMain();
-        async.execute();
-
         return view;
+    } // create
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            TwoFragment.AsyncTaskClassMain async = new TwoFragment.AsyncTaskClassMain();
+            async.execute();
+
+            adapter = new MyAdapter(getActivity(), list, new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    if (v.getTag() != null) {
+                        int position = (int) v.getTag();
+
+                        TwoFragment.AsyncTaskClassSub asyncSub = new TwoFragment.AsyncTaskClassSub();
+                        asyncSub.execute(position);
+                    }
+                }
+            });
+
+        } else {
+
+        }
     }
 
     class AsyncTaskClassMain extends android.os.AsyncTask<Integer, Long, String> {
@@ -132,7 +136,7 @@ public class TwoFragment extends Fragment {
         }
     } // end of AsyncTaskClassMain
 
-    class AsyncTaskClassSub extends android.os.AsyncTask<Integer, Data, String> {
+    class AsyncTaskClassSub extends android.os.AsyncTask<Integer, Data, Data> {
 
         @Override
         protected void onPreExecute() {
@@ -140,22 +144,22 @@ public class TwoFragment extends Fragment {
         }
 
         @Override
-        protected String doInBackground(Integer... integers) {
+        protected Data doInBackground(Integer... integers) {
             int position = integers[0];
-            adapter.TourData(position);
-            Log.d(TAG, "TwoFrag의 asynckTask에서 받는 포지션 : "+position);
 
-            Data data = getData(contentIdList.get(position));
+            Data data4 = getData(contentIdList4.get(position));
 
-            publishProgress(data);
-            return "작업 종료";
+            return data4;
         }
 
         @Override
         protected void onProgressUpdate(Data... values) {
-            Data data = values[0];
-            Log.d(TAG, "2 asyncTask에서 : "+data.toString());
-            Log.d(TAG, " 2 이미지 주소 : "+data.getFirstImage());
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected void onPostExecute(Data data) {
+            super.onPostExecute(data);
             dialogView = View.inflate(getActivity(), R.layout.detail_info, null);
             dialog = new AlertDialog.Builder(getActivity());
             dialog.setTitle("  -- 상세 정보 --");
@@ -166,8 +170,7 @@ public class TwoFragment extends Fragment {
             txt_Detail_Info.setText(data.getTitle()+"\n\n");
             txt_Detail_Info.append(data.getAddr()+"\n\n");
             txt_Detail_Info.append(data.getOverView()+"\n\n");
-
-           // img_Detail_Info.setImageURI(Uri.parse(data.getFirstImage()));
+            // img_Detail_Info.setImageURI(Uri.parse(data.getFirstImage()));
 
             dialog.setView(dialogView);
             dialog.setPositiveButton("확인", new DialogInterface.OnClickListener() {
@@ -179,12 +182,6 @@ public class TwoFragment extends Fragment {
 
             dialog.show();
 
-            super.onProgressUpdate(values);
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
         }
     } // end of AsyncTaskClass
 
@@ -192,11 +189,11 @@ public class TwoFragment extends Fragment {
     // contentid를 위한 함수(contentId는 detailCommon에서 쓰기 위해 구한다)
     private void getAreaBasedList() {
         queue = Volley.newRequestQueue(getActivity());
-        // 쇼핑 38
+        // 맛집 코드 39
         String url = "http://api.visitkorea.or.kr/openapi/service/"
                 + "rest/KorService/areaBasedList?ServiceKey=" + KEY
-                + "&areaCode=1&contentTypeId=38&listYN=Y&arrange=P"
-                + "&numOfRows=14&pageNo=1&MobileOS=AND&MobileApp="
+                + "&areaCode=1&contentTypeId=39&listYN=Y&arrange=P"
+                + "&numOfRows=8&pageNo=1&MobileOS=AND&MobileApp="
                 + appName + "&_type=json";
 
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
@@ -210,20 +207,21 @@ public class TwoFragment extends Fragment {
                             JSONObject parse_items = (JSONObject) parse_body.get("items");
                             JSONArray parse_itemlist = (JSONArray) parse_items.get("item");
 
+                            list.removeAll(list);
                             for (int i = 0; i < parse_itemlist.length(); i++) {
                                 JSONObject imsi = (JSONObject) parse_itemlist.get(i);
 
-                                Data data = new Data();
-                                data.setFirstImage(imsi.getString("firstimage"));
-                                data.setTitle(imsi.getString("title"));
+                                Data data4 = new Data();
+                                data4.setFirstImage(imsi.getString("firstimage"));
+                                data4.setTitle(imsi.getString("title"));
 
-                                list.add(data);
+                                list.add(data4);
 
-                                contentIdList.add(Integer.valueOf(imsi.getString("contentid")));
+                                contentIdList4.add(Integer.valueOf(imsi.getString("contentid")));
                             }
 
                             recyclerView.setAdapter(adapter);
-                            ((MainActivity)getActivity()).refresh();
+                            adapter.notifyDataSetChanged();
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -269,15 +267,12 @@ public class TwoFragment extends Fragment {
                             JSONObject parse_items = (JSONObject) parse_body.get("items");
                             JSONObject parse_itemlist = (JSONObject) parse_items.get("item");
 
-                            // detailData = null;
-                            detailData.setFirstImage(parse_itemlist.getString("firstimage"));
-                            detailData.setTitle(parse_itemlist.getString("title"));
-                            detailData.setAddr(parse_itemlist.getString("addr1"));
-                            detailData.setOverView(parse_itemlist.getString("overview"));
+                            detailData4.setFirstImage(parse_itemlist.getString("firstimage"));
+                            detailData4.setTitle(parse_itemlist.getString("title"));
+                            detailData4.setAddr(parse_itemlist.getString("addr1"));
+                            detailData4.setOverView(parse_itemlist.getString("overview"));
 
-                            ((MainActivity)getActivity()).refresh();
-                            Log.d(TAG, " Two frg : "+detailData.getTitle());
-
+                            Log.d(TAG, detailData4.getTitle());
 
 
                         } catch (JSONException e) {
@@ -294,8 +289,12 @@ public class TwoFragment extends Fragment {
                     }
                 });
         queue.add(jsObjRequest);
-        Log.d(TAG, "getDATA에서 : "+detailData);
-        return detailData;
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return detailData4;
     }
 
 

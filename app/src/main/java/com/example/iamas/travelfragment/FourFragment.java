@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -32,7 +31,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-// 맛집 코드 : 39
+// 문화 테마
 public class FourFragment extends Fragment {
     private View view;
     ProgressDialog pDialog;
@@ -47,7 +46,7 @@ public class FourFragment extends Fragment {
     // 메인 화면 출력용
     ArrayList<Data> list = new ArrayList<>();
     // 상세 다이얼로그 출력용
-    Data detailData = new Data();
+    Data detailData6 = new Data();
     TextView txt_Detail_Info ;
     ImageView img_Detail_Info ;
 
@@ -55,45 +54,54 @@ public class FourFragment extends Fragment {
     static final String KEY = "GN2mE8m8pbEpOyKZDhiRdDOZjg%2FR%2FUEIgo7z26k3HEefz8M0DvSZZwn0ekpLJmg%2F42jihzBbKf57CP79m12CrA%3D%3D";
     static final String appName = "Zella";
 
-    ArrayList<Integer> contentIdList = new ArrayList<>();
+    ArrayList<Integer> contentIdList6 = new ArrayList<>();
 
     public FourFragment() {
         // Required empty public constructor
     }
 
     //뷰페이저로 프레그먼트가 변화되는 상태를 저장하는 변수가 필요하다.
-    public static FourFragment newInstance(){
+    public  static FourFragment newInstance(){
         FourFragment fragmentFour = new FourFragment();
         return fragmentFour;
     }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view=inflater.inflate(R.layout.fragment_four,container,false);
-        ((MainActivity)getActivity()).refresh();
 
         recyclerView = view.findViewById(R.id.grid_recyclerview);
-        adapter = new MyAdapter(getActivity(), list, new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                if (v.getTag() != null) {
-                    int position = (int) v.getTag();
-
-                    FourFragment.AsyncTaskClassSub asyncSub = new FourFragment.AsyncTaskClassSub();
-                    asyncSub.execute(position);
-                }
-            }
-        });
 
         layoutManager = new LinearLayoutManager(getActivity());
 
         recyclerView.setLayoutManager(layoutManager);
 
-        FourFragment.AsyncTaskClassMain async = new FourFragment.AsyncTaskClassMain();
-        async.execute();
-
         return view;
+    } // create
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            FourFragment.AsyncTaskClassMain async = new FourFragment.AsyncTaskClassMain();
+            async.execute();
+
+            adapter = new MyAdapter(getActivity(), list, new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    if (v.getTag() != null) {
+                        int position = (int) v.getTag();
+
+                        FourFragment.AsyncTaskClassSub asyncSub = new FourFragment.AsyncTaskClassSub();
+                        asyncSub.execute(position);
+                    }
+                }
+            });
+        } else {
+
+        }
     }
 
     class AsyncTaskClassMain extends android.os.AsyncTask<Integer, Long, String> {
@@ -128,7 +136,7 @@ public class FourFragment extends Fragment {
         }
     } // end of AsyncTaskClassMain
 
-    class AsyncTaskClassSub extends android.os.AsyncTask<Integer, Data, String> {
+    class AsyncTaskClassSub extends android.os.AsyncTask<Integer, Data, Data> {
 
         @Override
         protected void onPreExecute() {
@@ -136,23 +144,23 @@ public class FourFragment extends Fragment {
         }
 
         @Override
-        protected String doInBackground(Integer... integers) {
+        protected Data doInBackground(Integer... integers) {
             int position = integers[0];
-            adapter.TourData(position);
-            Log.d(TAG, "클릭 이벤트");
-            Log.d(TAG, "포지션 값 : " + position);
 
-            Data data = getData(contentIdList.get(position));
+            Data data6 = getData(contentIdList6.get(position));
 
-            publishProgress(data);
-            return "작업 종료";
+            return data6;
         }
 
         @Override
         protected void onProgressUpdate(Data... values) {
-            Data data = values[0];
-            // Log.d(TAG, "asyncTask에서 : "+detailData);
-            Log.d(TAG, "asyncTask에서 : "+data.toString());
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected void onPostExecute(Data data) {
+
+            super.onPostExecute(data);
             dialogView = View.inflate(getActivity(), R.layout.detail_info, null);
             dialog = new AlertDialog.Builder(getActivity());
             dialog.setTitle("  -- 상세 정보 --");
@@ -175,12 +183,6 @@ public class FourFragment extends Fragment {
 
             dialog.show();
 
-            super.onProgressUpdate(values);
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
         }
     } // end of AsyncTaskClass
 
@@ -188,11 +190,11 @@ public class FourFragment extends Fragment {
     // contentid를 위한 함수(contentId는 detailCommon에서 쓰기 위해 구한다)
     private void getAreaBasedList() {
         queue = Volley.newRequestQueue(getActivity());
-        // 맛집 코드 39
+        // 문화 14
         String url = "http://api.visitkorea.or.kr/openapi/service/"
                 + "rest/KorService/areaBasedList?ServiceKey=" + KEY
-                + "&areaCode=1&contentTypeId=39&listYN=Y&arrange=P"
-                + "&numOfRows=14&pageNo=1&MobileOS=AND&MobileApp="
+                + "&areaCode=1&contentTypeId=14&listYN=Y&arrange=P"
+                + "&numOfRows=8&pageNo=1&MobileOS=AND&MobileApp="
                 + appName + "&_type=json";
 
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
@@ -206,16 +208,17 @@ public class FourFragment extends Fragment {
                             JSONObject parse_items = (JSONObject) parse_body.get("items");
                             JSONArray parse_itemlist = (JSONArray) parse_items.get("item");
 
+                            list.removeAll(list);
                             for (int i = 0; i < parse_itemlist.length(); i++) {
                                 JSONObject imsi = (JSONObject) parse_itemlist.get(i);
 
-                                Data data = new Data();
-                                data.setFirstImage(imsi.getString("firstimage"));
-                                data.setTitle(imsi.getString("title"));
+                                Data data6 = new Data();
+                                data6.setFirstImage(imsi.getString("firstimage"));
+                                data6.setTitle(imsi.getString("title"));
 
-                                list.add(data);
+                                list.add(data6);
 
-                                contentIdList.add(Integer.valueOf(imsi.getString("contentid")));
+                                contentIdList6.add(Integer.valueOf(imsi.getString("contentid")));
                             }
 
                             recyclerView.setAdapter(adapter);
@@ -265,12 +268,13 @@ public class FourFragment extends Fragment {
                             JSONObject parse_items = (JSONObject) parse_body.get("items");
                             JSONObject parse_itemlist = (JSONObject) parse_items.get("item");
 
-                            detailData.setFirstImage(parse_itemlist.getString("firstimage"));
-                            detailData.setTitle(parse_itemlist.getString("title"));
-                            detailData.setAddr(parse_itemlist.getString("addr1"));
-                            detailData.setOverView(parse_itemlist.getString("overview"));
+                            // detailData = null;
+                            detailData6.setFirstImage(parse_itemlist.getString("firstimage"));
+                            detailData6.setTitle(parse_itemlist.getString("title"));
+                            detailData6.setAddr(parse_itemlist.getString("addr1"));
+                            detailData6.setOverView(parse_itemlist.getString("overview"));
 
-                            Log.d(TAG, detailData.getTitle());
+                            Log.d(TAG, detailData6.getTitle());
 
 
                         } catch (JSONException e) {
@@ -287,8 +291,12 @@ public class FourFragment extends Fragment {
                     }
                 });
         queue.add(jsObjRequest);
-        Log.d(TAG, "getDATA에서 : "+detailData);
-        return detailData;
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return detailData6;
     }
 
 
